@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Study AI — Teach an AI from zero</title>
+<meta name="description" content="Study AI: a teaching-first, fully local knowledge framework. Builder + client, pure Python, no API, no hallucination." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0D1117; --bg-soft:#11161D; --panel:#161B22; --panel-2:#1C2230;
+    --border:#30363D; --text:#E6EDF3; --muted:#8B949E;
+    --accent:#3FB950; --accent-2:#2EA043; --accent-soft:rgba(63,185,80,.12);
+    --code-bg:#0A0E14; --shadow:0 1px 0 rgba(255,255,255,.03),0 8px 24px rgba(0,0,0,.4);
+  }
+  html[data-theme="light"]{
+    --bg:#F6F8FA; --bg-soft:#FFFFFF; --panel:#FFFFFF; --panel-2:#F0F3F6;
+    --border:#D0D7DE; --text:#1F2328; --muted:#59636E;
+    --accent:#1A7F37; --accent-2:#2DA44E; --accent-soft:rgba(26,127,55,.10);
+    --code-bg:#0D1117; --shadow:0 1px 2px rgba(31,35,40,.06),0 12px 28px rgba(31,35,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased; font-size:16px;
+    transition:background .25s ease,color .25s ease;
+  }
+  .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .en{display:inline}.zh{display:none}
+  html[data-lang="zh"] .en{display:none}html[data-lang="zh"] .zh{display:inline}
+  .zh,.en{font-family:inherit}
+
+  /* nav */
+  nav{position:fixed;top:14px;left:14px;right:14px;z-index:50;
+    background:color-mix(in srgb,var(--panel) 88%,transparent);
+    backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:14px;
+    box-shadow:var(--shadow)}
+  .nav-in{max-width:1120px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:18px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  .nav-links{display:flex;gap:22px;margin-left:auto;font-size:14px;color:var(--muted)}
+  .nav-links a{cursor:pointer;transition:color .15s}
+  .nav-links a:hover{color:var(--accent)}
+  .toggles{display:flex;gap:8px;align-items:center}
+  .btn-ico{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--border);
+    background:var(--panel-2);border-radius:10px;cursor:pointer;color:var(--text);transition:.15s}
+  .btn-ico:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-ico svg{width:18px;height:18px}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  /* hero */
+  header{padding:140px 0 70px}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);
+    border:1px solid var(--accent);display:inline-block;padding:5px 12px;border-radius:999px;
+    background:var(--accent-soft);letter-spacing:.5px}
+  h1{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(30px,5vw,52px);
+    line-height:1.1;margin:20px 0 16px;letter-spacing:-.5px}
+  h1 .g{color:var(--accent)}
+  .lead{max-width:680px;color:var(--muted);font-size:18px}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:13px 22px;border-radius:11px;
+    font-weight:600;font-size:15px;cursor:pointer;border:1px solid transparent;transition:.18s;font-family:'JetBrains Mono',monospace}
+  .btn svg{width:17px;height:17px}
+  .btn-primary{background:var(--accent);color:#04130A}
+  .btn-primary:hover{background:var(--accent-2);transform:translateY(-1px)}
+  .btn-ghost{background:transparent;border-color:var(--border);color:var(--text)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* terminal windows */
+  .terminals{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:48px}
+  @media(max-width:860px){.terminals{grid-template-columns:1fr}}
+  .term{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border)}
+  .term-bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar span{margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#8b949e}
+  .term pre{padding:16px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;
+    color:#c9d1d9;white-space:pre-wrap;word-break:break-word}
+  .term .p{color:var(--accent)}
+  .term .ok{color:#7ee787}
+  .term .mut{color:#6e7681}
+
+  /* sections */
+  section{padding:72px 0}
+  .sec-head{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+  h2{font-size:clamp(24px,3.4vw,34px);font-weight:700;margin:10px 0 14px;letter-spacing:-.4px}
+  .sec-sub{color:var(--muted);max-width:640px}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+  @media(max-width:900px){.steps{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.steps{grid-template-columns:1fr}}
+  .step{border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--panel);transition:.18s}
+  .step:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .step .n{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);border:1px solid var(--accent);
+    width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:14px;background:var(--accent-soft)}
+  .step h3{font-size:17px;margin-bottom:7px}
+  .step p{color:var(--muted);font-size:14.5px}
+
+  /* features */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+  @media(max-width:880px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .card{border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--panel);transition:.18s}
+  .card:hover{border-color:var(--accent)}
+  .card .ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);margin-bottom:14px}
+  .card .ic svg{width:20px;height:20px}
+  .card h3{font-size:16.5px;margin-bottom:7px}
+  .card p{color:var(--muted);font-size:14.5px}
+
+  /* spec */
+  .spec{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;margin-top:36px;align-items:start}
+  @media(max-width:840px){.spec{grid-template-columns:1fr}}
+  .tbl{width:100%;border-collapse:collapse;font-size:14.5px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .tbl th,.tbl td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border)}
+  .tbl th{background:var(--panel-2);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;color:var(--accent)}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl td .mono{color:var(--muted);font-size:13px}
+  .bin{border:1px solid var(--border);border-radius:12px;background:var(--code-bg);padding:18px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9;color:#c9d1d9}
+  .bin .lab{color:var(--accent)}
+  .bin .mut{color:#6e7681}
+
+  /* download */
+  .dl{border:1px solid var(--border);border-radius:18px;padding:40px;background:var(--panel);text-align:center;box-shadow:var(--shadow)}
+  .dl h2{margin-bottom:10px}
+  .dl p{color:var(--muted);max-width:520px;margin:0 auto 24px}
+
+  footer{border-top:1px solid var(--border);padding:34px 0;color:var(--muted);font-size:13.5px}
+  .foot-in{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  .foot-in a{color:var(--accent)}
+  html[data-lang="zh"] body{line-height:1.8}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <div class="brand"><span class="dot"></span>Study&nbsp;AI</div>
+    <div class="nav-links">
+      <a href="#how"><span class="en">How it works</span><span class="zh">工作原理</span></a>
+      <a href="#features"><span class="en">Features</span><span class="zh">特性</span></a>
+      <a href="#format"><span class="en">.study format</span><span class="zh">.study 格式</span></a>
+      <a href="#download"><span class="en">Download</span><span class="zh">下载</span></a>
+    </div>
+    <div class="toggles">
+      <button class="btn-ico" id="langBtn" aria-label="toggle language" title="EN / 中文">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h12M9 3v2M5 5c0 4 3 7 7 7M8 21l4-9 4 9M10 17h4"/></svg>
+      </button>
+      <button class="btn-ico" id="themeBtn" aria-label="toggle theme" title="Light / Dark">
+        <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow mono">TEACHING-FIRST · LOCAL-FIRST</span>
+    <h1><span class="en">Teach an AI <span class="g">from zero.</span><br>Export a file. Done.</span>
+      <span class="zh">从零教一个 <span class="g">AI。</span><br>导出一份文件，即成。</span></h1>
+    <p class="lead">
+      <span class="en">Study AI is a teaching-first, fully local knowledge framework. The builder starts empty — only common Chinese characters and symbols, zero knowledge — and learns by being taught. <span class="mono">build study</span> packs it into a portable <span class="mono">.study</span> file your client can use. No cloud, no API, no hallucination.</span>
+      <span class="zh">Study AI 是一个教学式、纯本地的知识框架。构建端出生即空壳——只认识中文常用字与符号，没有任何知识——靠被教而学习。<span class="mono">build study</span> 把它打包成可移植的 <span class="mono">.study</span> 文件，供客户端使用。无云端、无 API、不臆造。</span>
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span class="en">Download studyai.exe</span><span class="zh">下载 studyai.exe</span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/Developerprit/Study-AI" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.6 2 12.3c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .3.3.6.9.6 1.8v2.6c0 .3.2.6.7.5 3.9-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2z"/></svg>
+        <span class="en">GitHub</span><span class="zh">GitHub</span>
+      </a>
+    </div>
+
+    <div class="terminals">
+      <div class="term">
+        <div class="term-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>builder — teach</span></div>
+        <pre><span class="p">StudyAI:builder&gt;</span> <span class="mut">机器学习是人工智能的分支，使用大量数据训练模型。</span>
+<span class="ok">Recorded. Extracted 1 sentence(s). Key terms: 学习, 模型, 分支 …</span>
+<span class="p">StudyAI:builder&gt;</span> <span class="mut">build study</span>
+<span class="ok">Built .study → my-study.study (1 unit(s), 2 turn(s))</span></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>client — query</span></div>
+        <pre><span class="p">StudyAI:client&gt;</span> <span class="mut">什么是机器学习</span>
+<span class="ok">[Match #0] 机器学习是人工智能的分支，使用大量数据训练模型。</span>
+<span class="mut">    机器学习是人工智能的分支，使用大量数据训练模型。</span>
+<span class="p">StudyAI:client&gt;</span> <span class="mut">退出</span>
+<span class="ok">No relevant knowledge found.</span></pre>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">// PRINCIPLE</div>
+    <h2><span class="en">How it works</span><span class="zh">工作原理</span></h2>
+    <p class="sec-sub"><span class="en">Four steps, exactly as specified. Study AI learns the way a student does — by receiving external knowledge.</span><span class="zh">四个步骤，严格对应原理。Study AI 像学生一样学习——通过接受外部知识。</span></p>
+    <div class="steps">
+      <div class="step"><div class="n mono">01</div><h3><span class="en">Empty start</span><span class="zh">空壳起步</span></h3><p><span class="en">The builder knows only common Chinese characters + symbols. Zero knowledge.</span><span class="zh">构建端只认识中文常用字 + 符号，没有任何知识。</span></p></div>
+      <div class="step"><div class="n mono">02</div><h3><span class="en">Teach by chat</span><span class="zh">对话教学</span></h3><p><span class="en">You talk; StudyAI records every turn and auto-summarizes what it captured.</span><span class="zh">你对话；StudyAI 记录每一轮，并自动总结已学内容。</span></p></div>
+      <div class="step"><div class="n mono">03</div><h3><span class="en">Build study</span><span class="zh">打包导出</span></h3><p><span class="en">One command packs all history into a portable <span class="mono">.study</span> file.</span><span class="zh">一条命令把所有历史打包成可移植的 <span class="mono">.study</span> 文件。</span></p></div>
+      <div class="step"><div class="n mono">04</div><h3><span class="en">Use it</span><span class="zh">拿来即用</span></h3><p><span class="en">The client loads <span class="mono">.study</span> and answers by retrieval — never inventing.</span><span class="zh">客户端加载 <span class="mono">.study</span>，靠检索回答——绝不编造。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head">// WHY</div>
+    <h2><span class="en">Built for trust, not tricks</span><span class="zh">为可信而造，而非取巧</span></h2>
+    <div class="grid">
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3><span class="en">Records &amp; summarizes</span><span class="zh">记录与总结</span></h3><p><span class="en">Every teaching turn is logged; knowledge units are extracted and summarized automatically.</span><span class="zh">每一轮教学都被记录；知识单元自动抽取并总结。</span></p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/></svg></div><h3><span class="en">Pure local, no API</span><span class="zh">纯本地，无 API</span></h3><p><span class="en">Fully offline heuristics. No keys, no network, zero recurring cost.</span><span class="zh">纯本地启发式。无需密钥、无需联网、零持续成本。</span></p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg></div><h3><span class="en">Portable .study</span><span class="zh">可移植 .study</span></h3><p><span class="en">One self-contained file carries the whole knowledge base to any machine.</span><span class="zh">单一自包含文件即可把整个知识库带到任意机器。</span></p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M7 7v12M4 19h16M14 7v8"/></svg></div><h3><span class="en">Bigram retrieval</span><span class="zh">二元组检索</span></h3><p><span class="en">CJK bigram overlap matches queries; unmatched questions admit "I don't know".</span><span class="zh">中文二元组重叠匹配查询；无匹配时如实说「不知道」。</span></p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18M12 3a9 9 0 0 0 0 18M12 3v18"/></svg></div><h3><span class="en">Light &amp; dark CLI</span><span class="zh">浅 / 深 CLI 主题</span></h3><p><span class="en">Both ends ship a <span class="mono">--theme dark|light</span> colored interface.</span><span class="zh">两端均提供 <span class="mono">--theme dark|light</span> 着色界面。</span></p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><h3><span class="en">Checksum-verified</span><span class="zh">校验和保真</span></h3><p><span class="en">.study validates magic → length → gzip → checksum → version on load.</span><span class="zh">.study 加载时校验 magic → 长度 → gzip → 校验和 → 版本。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section id="format">
+  <div class="wrap">
+    <div class="sec-head">// FORMAT</div>
+    <h2><span class="en">The <span class="mono">.study</span> file</span><span class="zh"><span class="mono">.study</span> 文件格式</span></h2>
+    <p class="sec-sub"><span class="en">A self-describing, checksummed binary container — small, portable, and corruption-aware.</span><span class="zh">自描述、带校验和的二进制容器——小巧、可移植、可识别损坏。</span></p>
+    <div class="spec">
+      <table class="tbl">
+        <thead><tr><th><span class="en">Field</span><span class="zh">字段</span></th><th><span class="en">Meaning</span><span class="zh">含义</span></th></tr></thead>
+        <tbody>
+          <tr><td>version</td><td><span class="en">Format version (1)</span><span class="zh">格式版本（1）</span></td></tr>
+          <tr><td>name</td><td><span class="en">Knowledge base name</span><span class="zh">知识库名称</span></td></tr>
+          <tr><td>created</td><td><span class="en">ISO build timestamp</span><span class="zh">ISO 构建时间戳</span></td></tr>
+          <tr><td>builder</td><td><span class="en">Builder version</span><span class="zh">构建端版本</span></td></tr>
+          <tr><td>base_chars</td><td><span class="en">Common-char count (3755)</span><span class="zh">常用字数（3755）</span></td></tr>
+          <tr><td>vocab_hash</td><td><span class="en">Base-vocab sha256</span><span class="zh">基础字表 sha256</span></td></tr>
+          <tr><td>knowledge[]</td><td><span class="en">Units: id, raw, sentences, bigrams, summary</span><span class="zh">单元：id, raw, sentences, bigrams, summary</span></td></tr>
+          <tr><td>history[]</td><td><span class="en">Turns: role, text, ts</span><span class="zh">轮次：role, text, ts</span></td></tr>
+          <tr><td>checksum</td><td><span class="en">sha256 of all above</span><span class="zh">以上全部字段的 sha256</span></td></tr>
+        </tbody>
+      </table>
+      <div class="bin">
+<span class="lab">STUDYAI</span><span class="mut">\x01</span>  <span class="mut">; 8-byte magic</span>
+<span class="lab">uint32 LE</span>      <span class="mut">; compressed length</span>
+<span class="lab">gzip( json )</span>   <span class="mut">; payload, level 9</span>
+
+<span class="mut"># on load: magic → length → gzip → checksum → version</span>
+<span class="mut"># any mismatch => clear error, never silent</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="dl">
+      <h2><span class="en">Get Study AI</span><span class="zh">获取 Study AI</span></h2>
+      <p><span class="en">Single-file <span class="mono">studyai.exe</span> — builder and client in one binary. Pure Python 3.13, no dependencies.</span><span class="zh">单文件 <span class="mono">studyai.exe</span>——构建端与客户端合一。纯 Python 3.13，零依赖。</span></p>
+      <div class="cta-row" style="justify-content:center">
+        <a class="btn btn-primary" href="#download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span class="en">Download studyai.exe</span><span class="zh">下载 studyai.exe</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/Developerprit/Study-AI" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.6 2 12.3c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .3.3.6.9.6 1.8v2.6c0 .3.2.6.7.5 3.9-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2z"/></svg>
+          GitHub
+        </a>
+      </div>
+      <p style="margin-top:18px;font-size:13.5px" class="mono"><span class="en"># build it yourself</span><span class="zh"># 自行构建</span></p>
+      <p class="mono" style="color:var(--muted);font-size:13px"><span class="en">python -m nuitka --onefile --output-filename=studyai.exe studyai_cli.py</span><span class="zh">python -m nuitka --onefile --output-filename=studyai.exe studyai_cli.py</span></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <div><span class="mono">Study AI</span> · <span class="en">teaching-first knowledge framework</span><span class="zh">教学式知识框架</span></div>
+    <div><span class="en">Released under the </span><span class="zh">基于 </span><a href="https://license.kscm.top/available.md" target="_blank" rel="noopener">Available License</a><span class="en">.</span><span class="zh"> 发布。</span></div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var root=document.documentElement;
+    var themeBtn=document.getElementById('themeBtn');
+    var langBtn=document.getElementById('langBtn');
+    var iconMoon=document.getElementById('iconMoon');
+    var sun='<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4"/><circle cx="12" cy="12" r="4.5"/>';
+    var moon='<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>';
+    function applyTheme(t){root.setAttribute('data-theme',t);iconMoon.innerHTML=t==='dark'?moon:sun;}
+    themeBtn.addEventListener('click',function(){applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');});
+    langBtn.addEventListener('click',function(){root.setAttribute('data-lang',root.getAttribute('data-lang')==='en'?'zh':'en');});
+    applyTheme('dark');
+  })();
+</script>
+</body>
+</html>

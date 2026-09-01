@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+studyai_cli.build/
+studyai_cli.dist/
+studyai_cli.onefile-build/
