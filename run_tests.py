@@ -3,6 +3,7 @@
 All checks must pass before delivery ("ensure no bugs")."""
 
 import os
+import sys
 import tempfile
 import studyai
 
@@ -76,13 +77,19 @@ def test_retrieve():
     assert empty == []
 
 
-def test_cli_help():
-    import argparse
+def test_cli_noargs_launcher():
+    # No args (double-click) must NOT crash; it should enter the interactive
+    # launcher. We feed "3\n" to choose Exit so it returns cleanly.
+    import io
+    import contextlib
+    old_stdin = sys.stdin
+    sys.stdin = io.StringIO("3\n")
     try:
-        studyai.main([])
-        raise AssertionError("empty argv should require a subcommand")
-    except SystemExit as e:
-        assert e.code != 0
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = studyai.main([])
+        assert rc == 0, "no-arg launcher must exit cleanly (rc=0), got %r" % rc
+    finally:
+        sys.stdin = old_stdin
 
 
 if __name__ == "__main__":
@@ -91,5 +98,5 @@ if __name__ == "__main__":
     test_store_roundtrip()
     test_store_corruption()
     test_retrieve()
-    test_cli_help()
+    test_cli_noargs_launcher()
     print("ALL TESTS PASSED")

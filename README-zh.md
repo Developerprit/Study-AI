@@ -29,6 +29,12 @@ python -m nuitka --onefile --output-filename=studyai.exe studyai_cli.py
 
 ## 用法
 
+### 快速上手 —— 直接双击 `studyai.exe`
+
+不传任何参数时，Study AI 会打开一个交互式**启动菜单**（窗口保持打开）：
+`1` 构建端 · `2` 客户端 · `3` 退出。一次对话结束后会回到菜单，
+因此窗口不会自动关闭，直到你选「退出」为止。不会闪退、不会一闪而过。
+
 ### 构建端 —— 教它，然后导出
 
 ```bash

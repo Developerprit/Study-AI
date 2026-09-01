@@ -393,9 +393,58 @@ def run_client(path: str, theme: str) -> None:
             print("    " + e.raw)
 
 
+# ---------------------------------------------------------------- launcher
+def run_launcher(theme: str) -> None:
+    """Interactive mode for double-click users (no CLI args given).
+
+    Keeps the window alive by looping back to the menu after a session ends,
+    until the user explicitly chooses Exit."""
+    print(_t(theme, "Study AI v%s -- launcher" % VERSION, "info"))
+    print(_t(theme, "No arguments given. Pick a mode:", "hint"))
+    print(_color(theme, "  1  Builder   (teach it, then 'build study' to export)", "ok"))
+    print(_color(theme, "  2  Client    (load a .study and ask questions)", "ok"))
+    print(_color(theme, "  3  Exit", "hint"))
+    while True:
+        try:
+            choice = input(_color(theme, "Select [1/2/3]: ", "prompt")).strip().lower()
+        except EOFError:
+            print()
+            return
+        if choice in ("3", "exit", "quit"):
+            return
+        if choice in ("1", "b", "builder"):
+            name = input(_color(theme, "Study name: ", "prompt")).strip()
+            if not name:
+                name = "my-study"
+            run_builder(name, None, theme, None)
+            print()
+            continue
+        if choice in ("2", "c", "client"):
+            path = input(_color(theme, "Path to .study file: ", "prompt")).strip()
+            if not path:
+                print(_t(theme, "No path provided.", "warn"))
+                continue
+            try:
+                run_client(path, theme)
+            except Exception as ex:
+                print(_t(theme, "Failed to load: %s" % ex, "warn"))
+            print()
+            continue
+        print(_t(theme, "Invalid choice. Type 1, 2 or 3.", "warn"))
+
+
 # ---------------------------------------------------------------- CLI entry
 def main(argv: Optional[List[str]] = None) -> int:
     import argparse
+    if argv is None:
+        argv = sys.argv[1:]
+    if len(argv) == 0:
+        # Double-click / no-arg: friendly interactive launcher, window stays open.
+        try:
+            run_launcher("dark")
+        except KeyboardInterrupt:
+            print()
+        return 0
     p = argparse.ArgumentParser(
         prog="studyai",
         description="Study AI -- a teaching-first, fully local knowledge framework",
@@ -421,4 +470,14 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception as exc:  # keep the window open on crash (double-click safety)
+        sys.stdout.write("Study AI crashed: %s\n" % exc)
+        try:
+            input("Press Enter to exit...")
+        except Exception:
+            pass
+        sys.exit(1)

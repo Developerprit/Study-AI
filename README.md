@@ -32,6 +32,12 @@ python -m nuitka --onefile --output-filename=studyai.exe studyai_cli.py
 
 ## Usage
 
+### Quick start — just double-click `studyai.exe`
+
+With no arguments, Study AI opens an interactive **launcher menu** (window stays open):
+`1` Builder · `2` Client · `3` Exit. After a session it loops back to the menu,
+so the window never closes until you pick Exit. No flashing, no disappearing window.
+
 ### Builder — teach it, then export
 
 ```bash
